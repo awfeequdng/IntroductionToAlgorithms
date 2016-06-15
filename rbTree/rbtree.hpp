@@ -198,20 +198,76 @@ void rbtree<T>::rbDelete(rbTreeNode<T> *z)
 template <typename T>
 void rbtree<T>::rbDeleteFixup(rbTreeNode<T> *x)
 {
-    rbTreeNode<T> *p,*sibling = nil,*gp = nil;
-    p = x->parent;
-    if(p != nil)
-    {
-        gp = p->parent;
-        x == p->left ? sibling = p->right : sibling = p->left;
-    }
+    rbTreeNode<T> *w = nil;
 
-    while(x->color == RB_COLOR_BLACK)
+    while(x != root && x->color == RB_COLOR_BLACK)
     {
+        if(x->parent->left == x)        //left
+        {
+            w = x->parent->right;
+            if(w->color == RB_COLOR_RED) //x->parent->right->color == RB_COLOR_RED
+            {
+                leftRotate(x->parent);  //then x->parent->right->color == RB_COLOR_BLACK
+                x->parent->color = RB_COLOR_RED;
+                x->parent->parent->color = RB_COLOR_BLACK;
+                w = x->parent->right;
+            }
 
+//          w->color == RB_COLOR_BLACK
+            if(w->right->color == RB_COLOR_BLACK)    //at this point, x->parent->color must equal red
+            {
+                if(w->left->color == RB_COLOR_BLACK)
+                {
+                    x = x->parent;
+                    w->color = RB_COLOR_RED;
+                    continue;
+                }
+                //w->left->color == RB_COLOR_RED
+                w->left->color = RB_COLOR_BLACK;
+                w->color = RB_COLOR_RED;
+                rightRotate(w);
+                w = x->parent->right;
+            }
+//            w->right->color == RB_COLOR_RED
+            w->color = RB_COLOR_RED;
+            w->right->color = RB_COLOR_BLACK;
+            x->parent->color = RB_COLOR_BLACK;
+            leftRotate(x->parent);
+            x = root;
+
+        }
+        else        //right
+        {
+            w = x->parent->left;
+            if(w->color == RB_COLOR_RED)
+            {
+                w->color = RB_COLOR_BLACK;
+                w->parent->color = RB_COLOR_RED;
+                rightRotate(x->parent);
+                w = x->parent->left;
+            }
+            if(w->left->color == RB_COLOR_BLACK)
+            {
+                if(w->right->color == RB_COLOR_BLACK)
+                {
+                    w->color = RB_COLOR_RED;
+                    x = x->parent;
+                    continue;
+                }
+//                w->right->color == RB_COLOR_RED
+                w->right->color = RB_COLOR_BLACK;
+                w->color = RB_COLOR_RED;
+                leftRotate(w);
+                w = x->parent->left;
+            }
+//            w->left->color == RB_COLOR_RED
+            w->left->color = RB_COLOR_BLACK;
+            w->color = RB_COLOR_RED;
+            w->parent->color = RB_COLOR_BLACK;
+            x = root;
+        }
     }
     x->color = RB_COLOR_BLACK;
-
 }
 
 template <typename T>
@@ -231,29 +287,36 @@ void rbtree<T>::rbInsertFixup(rbTreeNode<T> *x)
             u->color = RB_COLOR_BLACK;
             gp->color = RB_COLOR_RED;
             x = gp;
-            continue;
+//            continue;
         }                               //u->color is black
         else
         {
             if(p == gp->left)
             {
                 if(x == p->right)
+                {
                     leftRotate(p);
-
-                rightRotate(x);
-                x->color = RB_COLOR_BLACK;
-                x->right->color = RB_COLOR_RED;
+                    x = p->left;
+                    p = x->parent;
+                }
+                rightRotate(gp);
+                gp->color = RB_COLOR_BLACK;
+                gp->right->color = RB_COLOR_RED;
             }
             else
             {
                 if(x == p->left)
-                    rightRotate(x);
+                {
+                    rightRotate(p);
+                    x = x->right;
+                    p = x->parent;
+                }
 
-                leftRotate(x);
-                x->color = RB_COLOR_BLACK;
-                x->left->color = RB_COLOR_RED;
+                leftRotate(gp);
+                gp->color = RB_COLOR_BLACK;
+                gp->left->color = RB_COLOR_RED;
             }
-            return;     //
+//            return;     //
         }
     }
     x->color = RB_COLOR_BLACK;
