@@ -3,12 +3,11 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += main.cpp \
-    redblacktree.cpp
+SOURCES += main.cpp
 
 include(deployment.pri)
 qtcAddDeployment()
 
 HEADERS += \
-    redblacktree.h
+    rbtree.hpp
 
